@@ -1,0 +1,41 @@
+﻿@using BlazorPBM.Services
+@inherits LayoutComponentBase
+@inject ErrorService ErrorService
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4">
+            <label style="color:red">@ErrorMessage</label>
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+@code {
+    private string? ErrorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(0);
+        ErrorService.OnError += async (msg) =>
+        {
+            ErrorMessage = msg;
+            await InvokeAsync(StateHasChanged);
+
+            await Task.Delay(20000);
+            Dispose();
+            await InvokeAsync(StateHasChanged);
+        };
+    }
+
+    public void Dispose()
+    {
+        ErrorService.OnError -= (msg) => { };
+    }
+}

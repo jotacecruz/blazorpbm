@@ -1,0 +1,31 @@
+﻿@page "/"
+@using BlazorPBM.Models
+@using BlazorPBM.Services
+@using System.Net.Http.Headers
+@using System.Text.Json
+@inject IJSRuntime JS
+@inject HttpClient Http
+@inject TokenService TokenService
+@inject UserService UserService
+
+<PageTitle>Home</PageTitle>
+
+<h1>Hello, world!</h1>
+
+Welcome to PBM app.
+<button @onclick="SignIn">Sign in with Google</button>
+@code {
+
+    private async Task SignIn()
+    {
+        TokenService.SetAccessToken(await JS.InvokeAsync<string>("getAccessToken"));
+        if (TokenService.AccessToken is not null)
+        {
+            string url = $"https://www.googleapis.com/oauth2/v2/userinfo";
+            Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenService.AccessToken?.Access_token);
+            string user = await Http.GetStringAsync(url);
+            TokenService.UserInfo = JsonSerializer.Deserialize<GoogleUserInfo>(user, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            await UserService.SetUserId();
+        }
+    }
+}

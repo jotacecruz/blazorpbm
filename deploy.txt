@@ -1,0 +1,3 @@
+dotnet publish -c Release -o dist
+cd dist/wwwroot
+netlify deploy --dir=. --prod --verbose

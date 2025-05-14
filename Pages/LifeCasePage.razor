@@ -1,0 +1,152 @@
+﻿@page "/lifecase"
+@using BlazorPBM.Models
+@using BlazorPBM.Services
+@using Radzen
+@using Radzen.Blazor
+@inject LifeCaseService LifeCaseService
+@inject LifeCaseRemarkService LifeCaseRemarkService
+@inject UserService UserService
+@inject ErrorService ErrorService
+@inject ReferenceDataService ReferenceDataService
+
+<PageTitle>Life Cases</PageTitle>
+
+@if (lifeCaseList == null)
+{
+    <p><em><i>loading...</i></em></p>
+}
+else
+{
+    <div style="display: flex;height: 100vh;flex-direction: column;">
+        <div style="height:50vh; overflow: auto;">
+            <RadzenDataGrid Data="@lifeCaseList" TItem="LifeCase" AllowSorting="true" AllowColumnResize="true" SelectionMode="DataGridSelectionMode.Single" RowSelect="@(async (item) => { lifeCase = item; lifeCaseRemarkList = await LifeCaseRemarkService.GetAllLifeCaseRemark(item.LifeCaseId);})">
+                <Columns>
+                    <RadzenDataGridColumn Title="Owner"><Template Context="data">@data.Owner?.Name</Template></RadzenDataGridColumn>
+                    <RadzenDataGridColumn Property="Status" Title="Status" />
+                    <RadzenDataGridColumn Title="Insured"><Template Context="data">@data.Insured?.FullName</Template></RadzenDataGridColumn>
+                    <RadzenDataGridColumn Property="ParamedDate" Title="ParamedDate" FormatString="{0:d}" />
+                    <RadzenDataGridColumn Property="FaceAmount" Title="FaceAmount" />
+                    <RadzenDataGridColumn Property="Class" Title="Class" />
+                </Columns>
+            </RadzenDataGrid>
+        </div>
+        <div style="height:50vh; overflow: auto;margin-top:1%;">
+            <RadzenTabs RenderMode="TabRenderMode.Server">
+                <Tabs>
+                    <RadzenTabsItem Text="Info">
+                        <RadzenTemplateForm Data="@lifeCase" Submit="@(EventCallback.Factory.Create<LifeCase>(this, Submit))">
+                            <RadzenRow>
+                                <RadzenColumn><RadzenDropDown Data="@companyList" @bind-Value="@lifeCase.CompanyId" AllowClear="true" Placeholder="company.." TextProperty="Name" ValueProperty="CompanyId"></RadzenDropDown></RadzenColumn>
+                                <RadzenColumn><RadzenLabel Text="PHN: " /><RadzenTextBox /></RadzenColumn>
+                                <RadzenColumn><RadzenLabel Text="ABS: " /><RadzenTextBox /></RadzenColumn>
+                                <RadzenColumn><RadzenLabel Text="AGENT: " /><RadzenTextBox /></RadzenColumn>
+                                <RadzenColumn><RadzenLabel Text="PBM: " /><RadzenTextBox /></RadzenColumn>
+                            </RadzenRow>
+                            <br />
+                            <RadzenRow Style="border: 1px solid #ccc; padding: 10px;">
+                                <RadzenColumn><RadzenLabel Text="POLICY NUMBER # " /><RadzenTextBox @bind-Value=@lifeCase.PolicyNumber /></RadzenColumn>
+                                <RadzenColumn><RadzenLabel Text="STATUS " /><RadzenTextBox @bind-Value=@lifeCase.Status /></RadzenColumn>
+                                <RadzenColumn><RadzenLabel Text="POLICY ISSUED " /><RadzenDatePicker @bind-Value=@lifeCase.PolicyIssued /></RadzenColumn>
+                            </RadzenRow>
+                            <br />
+                            <RadzenRow Style="border: 1px solid #ccc; padding: 10px;">
+                                <RadzenColumn><RadzenLabel Text="APP DATE " /><RadzenDatePicker @bind-Value=@lifeCase.PolicyIssued /></RadzenColumn>
+                                <RadzenColumn><RadzenLabel Text="APP SENT " /><RadzenDatePicker @bind-Value=@lifeCase.PolicyIssued /></RadzenColumn>
+                                <RadzenColumn><RadzenLabel Text="DRAFTY DATE " /><RadzenDatePicker @bind-Value=@lifeCase.PolicyIssued /></RadzenColumn>
+                            </RadzenRow>
+                            <br />
+                            <RadzenRow>
+                                <RadzenColumn><RadzenTextBox Placeholder="name.." /></RadzenColumn>
+                            </RadzenRow>
+                            <RadzenRow>
+                                <RadzenColumn><RadzenTextBox Placeholder="address.." /></RadzenColumn>
+                            </RadzenRow>
+                            <RadzenRow>
+                                <RadzenColumn><RadzenTextBox Placeholder="mobile.." /></RadzenColumn>
+                                <RadzenColumn><RadzenTextBox Placeholder="phone.." /></RadzenColumn>
+                                <RadzenColumn><RadzenTextBox Placeholder="home.." /></RadzenColumn>
+                                <RadzenColumn><RadzenLabel Text="HEIGHT " /><RadzenNumeric @bind-Value=@lifeCase.Height Placeholder="0.0" Step="0.5" /></RadzenColumn>
+                                <RadzenColumn><RadzenLabel Text="WEIGHT " /><RadzenNumeric @bind-Value=@lifeCase.Weight Placeholder="0.0" Step="0.5" /></RadzenColumn>
+                            </RadzenRow>
+                        </RadzenTemplateForm>
+                    </RadzenTabsItem>
+                    <RadzenTabsItem Text="REMARKS">
+                        <RadzenDataGrid @ref="lifeCaseRemarkGrid" Data="@lifeCaseRemarkList" TItem="LifeCaseRemark" AllowSorting="true" AllowColumnResize="true" EditMode=DataGridEditMode.Single>
+                            <HeaderTemplate>
+                                <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle" Click="@(async (item) => { await lifeCaseRemarkGrid.InsertRow(new LifeCaseRemark(){ LifeCaseId = lifeCase.LifeCaseId});})" />
+                            </HeaderTemplate>
+                            <Columns>
+                                <RadzenDataGridColumn Property="Remark" Title="Remark">
+                                    <EditTemplate Context="remark">
+                                        <RadzenTextBox @bind-Value=@remark.Remark />
+                                    </EditTemplate>
+                                </RadzenDataGridColumn>
+                                <RadzenDataGridColumn Property="Modified" Title="Modified" FormatString="{0:d}" />
+                                <RadzenDataGridColumn Title="User"><Template Context="data">@data.Modifier?.Name</Template></RadzenDataGridColumn>
+                                <RadzenDataGridColumn Context="order" Filterable="false" Sortable="false" TextAlign="TextAlign.Right" Frozen="true" FrozenPosition="FrozenColumnPosition.Right">
+                                    <Template Context="order">
+                                        <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" class="rz-my-1 rz-ms-1" Click="@(args => {})" @onclick:stopPropagation="true" />
+                                        <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Flat" Size="ButtonSize.Medium" Shade="Shade.Lighter" class="rz-my-1 rz-ms-1" Click="@(args => {})" @onclick:stopPropagation="true" />
+                                    </Template>
+                                    <EditTemplate Context="order">
+                                        <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@((args) => SaveLifeCaseRemark(order))" aria-label="Save" />
+                                        <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" class="rz-my-1 rz-ms-1" Click="@((args) => {})" aria-label="Cancel" />
+                                        <RadzenButton Icon="delete" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Flat" Size="ButtonSize.Medium" Shade="Shade.Lighter" class="rz-my-1 rz-ms-1" Click="@(args => {})" aria-label="Delete" />
+                                    </EditTemplate>
+                                </RadzenDataGridColumn>
+                            </Columns>
+                        </RadzenDataGrid>
+                    </RadzenTabsItem>
+                </Tabs>
+            </RadzenTabs>
+        </div>
+    </div>
+}
+
+@code {
+    RadzenDataGrid<LifeCaseRemark> lifeCaseRemarkGrid = new RadzenDataGrid<LifeCaseRemark>();
+
+    private List<Company> companyList = new List<Company>();
+    private List<LifeCase> lifeCaseList = new List<LifeCase>();
+    private List<LifeCaseRemark> lifeCaseRemarkList = new List<LifeCaseRemark>();
+    private LifeCase lifeCase = new LifeCase();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            companyList = await ReferenceDataService.GetAllCompany();
+            lifeCaseList = await LifeCaseService.GetAllLifeCase();
+        }
+        catch (Exception ex)
+        {
+            ErrorService.ReportError(ex);
+        }
+    }
+
+    public async Task Submit()
+    {
+        try
+        {
+            await LifeCaseService.SaveLifeCase(lifeCase);
+            lifeCase = new LifeCase();
+        }
+        catch (Exception ex)
+        {
+            ErrorService.ReportError(ex);
+        }
+    }
+
+    async Task SaveLifeCaseRemark(LifeCaseRemark item)
+    {
+        try
+        {
+            await LifeCaseRemarkService.SaveLifeCaseRemark(item);
+            lifeCaseRemarkList = await LifeCaseRemarkService.GetAllLifeCaseRemark(item.LifeCaseId);
+        }
+        catch (Exception ex)
+        {
+            ErrorService.ReportError(ex);
+        }
+    }
+}

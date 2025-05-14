@@ -1,0 +1,19 @@
+﻿<h3>PopUp</h3>
+<div style="display:@(Visible ? "block":"none")">
+    <dialog open>
+        <p>Greetings, one and all!</p>
+        <form method="dialog">
+            <button>OK</button>
+        </form>
+    </dialog>
+</div>
+
+@code {
+
+    [Parameter]
+    public bool Visible { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> VisibleChanged { get; set; }
+
+}

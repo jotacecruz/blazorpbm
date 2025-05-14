@@ -1,0 +1,65 @@
+﻿@page "/insured"
+@using BlazorPBM.Models
+@using BlazorPBM.Services
+@using Radzen
+@using Radzen.Blazor
+@inject InsuredService InsuredService
+
+<PageTitle>Insured</PageTitle>
+
+<h1>Insured</h1>
+
+@if (insuredList == null)
+{
+    <p><em><i>loading...</i></em></p>
+}
+else
+{
+    <div style="display: flex;height: 45vh;flex-direction: column;overflow: auto;">
+        <RadzenDataGrid Data="@insuredList" TItem="Insured" AllowSorting="true" AllowColumnResize="true" AllowFiltering="true" SelectionMode="DataGridSelectionMode.Single" FilterMode="FilterMode.Simple" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" RowSelect="@(async (item) => { insured = item; })">
+            <Columns>
+                <RadzenDataGridColumn Property="Business" Title="Type" Width="5%">
+                    <Template>
+                        @if (context.Business == true)
+                        {
+                            <span>Business</span>
+                        }
+                        else
+                        {
+                            <span>Personal</span>
+                        }
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn Property="FullName" Title="Name" Width="auto" />
+                <RadzenDataGridColumn Property="Email" Title="Email" Width="auto" />
+                <RadzenDataGridColumn Property="Contact" Title="Contact" Width="auto" />
+                <RadzenDataGridColumn Property="AlternativeContact" Title="Alternative" Width="auto" />
+            </Columns>
+        </RadzenDataGrid>
+    </div>
+    <center style="background-color:black;padding:2px;margin:8px 0px 8px 0px;"><span><b style="color: white">@(insured.InsuredId <= 0 ? "new record" : $"{insured.FullName?.ToUpper()} (ID: {insured.InsuredId})")</b></span></center>
+    <div style="display: flex;height: 45vh;flex-direction: column;overflow: auto;">
+        <RadzenTabs RenderMode="TabRenderMode.Server">
+            <Tabs>
+                <RadzenTabsItem Text="Info">
+                    @* <CustomerInfo Customer="@customer" OnSave="@(async () => { customers = await BusinessService.GetCustomers(); })" OnCancel="@(() => { customer =  new Customer();})"></CustomerInfo> *@
+                </RadzenTabsItem>
+                <RadzenTabsItem Text="Remarks">
+                    @* <CustomerRemarks Customer="@customer" OnSave="@(async () => { customers = await BusinessService.GetCustomers(); })" OnCancel="@(() => { customer =  new Customer();})"></CustomerRemarks> *@
+                </RadzenTabsItem>
+            </Tabs>
+        </RadzenTabs>
+    </div>
+}
+
+
+@code {
+
+    private List<Insured>? insuredList;
+    private Insured insured = new Insured();
+
+    protected override async Task OnInitializedAsync()
+    {
+        insuredList = await InsuredService.GetAllInsured();
+    }
+}
