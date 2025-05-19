@@ -16,6 +16,28 @@ Welcome to PBM app.
 <button @onclick="SignIn">Sign in with Google</button>
 @code {
 
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(0);
+        string access_token = await JS.InvokeAsync<string>("getCookie", "access_token");
+        if (access_token is not null)
+        {
+            string expires_in = await JS.InvokeAsync<string>("getCookie", "expires_in");
+            string refresh_token = await JS.InvokeAsync<string>("getCookie", "refresh_token");
+            string token_type = await JS.InvokeAsync<string>("getCookie", "token_type");
+            TokenService.AccessToken = new AccessToken()
+                {
+                    Access_token = access_token,
+                    Expires_in = int.Parse(expires_in),
+                    Refresh_token = refresh_token,
+                    Token_type = token_type
+                };
+            TokenService.UserInfo = new GoogleUserInfo();
+            TokenService.UserInfo.UserId = (await JS.InvokeAsync<string>("getCookie", "user_id")).ToString().ToInt();
+            // string tokenValidate = await JS.InvokeAsync<string>($"validateAccessToken('{access_token}')");
+        }
+    }
+
     private async Task SignIn()
     {
         TokenService.SetAccessToken(await JS.InvokeAsync<string>("getAccessToken"));
@@ -25,7 +47,8 @@ Welcome to PBM app.
             Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TokenService.AccessToken?.Access_token);
             string user = await Http.GetStringAsync(url);
             TokenService.UserInfo = JsonSerializer.Deserialize<GoogleUserInfo>(user, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            await UserService.SetUserId();
+            int userId = await UserService.SetUserId();
+            await JS.InvokeAsync<string>("setCookie", "user_id", userId);
         }
     }
 }

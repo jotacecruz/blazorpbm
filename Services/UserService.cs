@@ -24,16 +24,21 @@ namespace BlazorPBM.Services
             return userList;
         }
 
-        public async Task<User> GetUser(int userId)
+        public async Task<User?> GetUser(int userId)
         {
-            return (await GetAllUser()).First(x => x.UserId == userId);
+            await Task.Delay(0);
+            return userList?.Any(x => x.UserId == userId) ?? false ? userList?.First(x => x.UserId == userId) : null;
         }
 
-        public async Task SetUserId()
+        public async Task<int> SetUserId()
         {
             List<User> userList = await GetAllUser();
             if (_tokenService.UserInfo is not null)
+            {
                 _tokenService.UserInfo.UserId = userList.First(x => x.Username == _tokenService.UserInfo.Email?.Split('@')[0]).UserId;
+                return _tokenService.UserInfo.UserId;
+            }
+            return 0;
         }
     }
 }

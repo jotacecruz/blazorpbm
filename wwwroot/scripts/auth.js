@@ -12,7 +12,11 @@ async function getAccessToken() {
                 if (response.error) {
                     reject(response.error);
                 } else {
-                    document.cookie = `access_token=${response.access_token}; path=/; Secure`;
+                    console.log(response);
+                    document.cookie = `access_token=${response.access_token}; path=/; Secure; SameSite=Lax; max-age=3600`;
+                    document.cookie = `expires_in=${response.expires_in}; path=/; Secure; SameSite=Lax; max-age=3600`;
+                    document.cookie = `refresh_token=${response.refresh_token}; path=/; Secure; SameSite=Lax; max-age=3600`;
+                    document.cookie = `token_type=${response.token_type}; path=/; Secure; SameSite=Lax; max-age=3600`;
                     resolve(JSON.stringify(response));
                 }
             }
@@ -20,4 +24,25 @@ async function getAccessToken() {
 
         tokenClient.requestAccessToken();
     });
+}
+
+async function getCookie(name) {
+    const cookies = document.cookie.split('; ');
+    for (let cookie of cookies) {
+        let [key, value] = cookie.split('=');
+        if (key === name) return decodeURIComponent(value);
+    }
+    return null;
+}
+
+async function setCookie(name, value) {
+    document.cookie = `${name}=${value}; path=/; Secure; SameSite=Lax; max-age=3600`;
+}
+
+async function validateAccessToken(accessToken) {
+    console.log(accessToken);
+    const response = await fetch(`https://www.googleapis.com/oauth2/v2/tokeninfo?access_token=${accessToken}`);
+    if (response.ok == false)
+        console.log(`error: ${response.status} ${response.statusText}`);
+    return response.ok;
 }

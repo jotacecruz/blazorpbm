@@ -4,6 +4,7 @@
     {
         public int LifeCaseOfferId { get; set; }
         public int LifeCaseId { get; set; }
+        public string? Type { get; set; }
         public int? CompanyId { get; set; }
         public string? PolicyNumber { get; set; }
         public DateTime? PolicyExpiry { get; set; }

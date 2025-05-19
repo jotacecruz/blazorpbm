@@ -5,6 +5,7 @@
 @using Radzen.Blazor
 @inject LifeCaseService LifeCaseService
 @inject LifeCaseRemarkService LifeCaseRemarkService
+@inject InsuredService InsuredService
 @inject UserService UserService
 @inject ErrorService ErrorService
 @inject ReferenceDataService ReferenceDataService
@@ -17,9 +18,12 @@
 }
 else
 {
-    <div style="display: flex;height: 100vh;flex-direction: column;">
-        <div style="height:50vh; overflow: auto;">
+    <div style="display: flex;height: 150vh;flex-direction: column;">
+        <div style="height:20vh; overflow: auto;">
             <RadzenDataGrid Data="@lifeCaseList" TItem="LifeCase" AllowSorting="true" AllowColumnResize="true" SelectionMode="DataGridSelectionMode.Single" RowSelect="@(async (item) => { lifeCase = item; lifeCaseRemarkList = await LifeCaseRemarkService.GetAllLifeCaseRemark(item.LifeCaseId);})">
+                <HeaderTemplate>
+                    <RadzenButton ButtonStyle="ButtonStyle.Success" Icon="add_circle" Click="@(async (item) => { lifeCase = new LifeCase();})" />
+                </HeaderTemplate>
                 <Columns>
                     <RadzenDataGridColumn Title="Owner"><Template Context="data">@data.Owner?.Name</Template></RadzenDataGridColumn>
                     <RadzenDataGridColumn Property="Status" Title="Status" />
@@ -30,45 +34,490 @@ else
                 </Columns>
             </RadzenDataGrid>
         </div>
-        <div style="height:50vh; overflow: auto;margin-top:1%;">
+        <div style="height:80vh; overflow: auto;margin-top:1%;">
             <RadzenTabs RenderMode="TabRenderMode.Server">
                 <Tabs>
-                    <RadzenTabsItem Text="Info">
-                        <RadzenTemplateForm Data="@lifeCase" Submit="@(EventCallback.Factory.Create<LifeCase>(this, Submit))">
-                            <RadzenRow>
-                                <RadzenColumn><RadzenDropDown Data="@companyList" @bind-Value="@lifeCase.CompanyId" AllowClear="true" Placeholder="company.." TextProperty="Name" ValueProperty="CompanyId"></RadzenDropDown></RadzenColumn>
-                                <RadzenColumn><RadzenLabel Text="PHN: " /><RadzenTextBox /></RadzenColumn>
-                                <RadzenColumn><RadzenLabel Text="ABS: " /><RadzenTextBox /></RadzenColumn>
-                                <RadzenColumn><RadzenLabel Text="AGENT: " /><RadzenTextBox /></RadzenColumn>
-                                <RadzenColumn><RadzenLabel Text="PBM: " /><RadzenTextBox /></RadzenColumn>
-                            </RadzenRow>
-                            <br />
-                            <RadzenRow Style="border: 1px solid #ccc; padding: 10px;">
-                                <RadzenColumn><RadzenLabel Text="POLICY NUMBER # " /><RadzenTextBox @bind-Value=@lifeCase.PolicyNumber /></RadzenColumn>
-                                <RadzenColumn><RadzenLabel Text="STATUS " /><RadzenTextBox @bind-Value=@lifeCase.Status /></RadzenColumn>
-                                <RadzenColumn><RadzenLabel Text="POLICY ISSUED " /><RadzenDatePicker @bind-Value=@lifeCase.PolicyIssued /></RadzenColumn>
-                            </RadzenRow>
-                            <br />
-                            <RadzenRow Style="border: 1px solid #ccc; padding: 10px;">
-                                <RadzenColumn><RadzenLabel Text="APP DATE " /><RadzenDatePicker @bind-Value=@lifeCase.PolicyIssued /></RadzenColumn>
-                                <RadzenColumn><RadzenLabel Text="APP SENT " /><RadzenDatePicker @bind-Value=@lifeCase.PolicyIssued /></RadzenColumn>
-                                <RadzenColumn><RadzenLabel Text="DRAFTY DATE " /><RadzenDatePicker @bind-Value=@lifeCase.PolicyIssued /></RadzenColumn>
-                            </RadzenRow>
-                            <br />
-                            <RadzenRow>
-                                <RadzenColumn><RadzenTextBox Placeholder="name.." /></RadzenColumn>
-                            </RadzenRow>
-                            <RadzenRow>
-                                <RadzenColumn><RadzenTextBox Placeholder="address.." /></RadzenColumn>
-                            </RadzenRow>
-                            <RadzenRow>
-                                <RadzenColumn><RadzenTextBox Placeholder="mobile.." /></RadzenColumn>
-                                <RadzenColumn><RadzenTextBox Placeholder="phone.." /></RadzenColumn>
-                                <RadzenColumn><RadzenTextBox Placeholder="home.." /></RadzenColumn>
-                                <RadzenColumn><RadzenLabel Text="HEIGHT " /><RadzenNumeric @bind-Value=@lifeCase.Height Placeholder="0.0" Step="0.5" /></RadzenColumn>
-                                <RadzenColumn><RadzenLabel Text="WEIGHT " /><RadzenNumeric @bind-Value=@lifeCase.Weight Placeholder="0.0" Step="0.5" /></RadzenColumn>
-                            </RadzenRow>
-                        </RadzenTemplateForm>
+                    <RadzenTabsItem Text="CASE">
+                        <RadzenRow>
+                            <RadzenColumn Size="12" SizeMD="12">
+                                <RadzenStack>
+                                    <RadzenFieldset Text="Policy Info">
+                                        <RadzenRow AlignItems="AlignItems.Center">
+                                            @*                                                 <RadzenColumn Size="1" SizeMD="1">
+                                                    <RadzenLabel Text="Insured" Component="InsuredId" Style="width: 100%; text-align: right;" />
+                                                </RadzenColumn> *@
+                                            <RadzenColumn Size="2" SizeMD="2">
+                                                <RadzenDropDown @bind-Value="lifeCase.InsuredId" AllowClear="true" Placeholder="Select insured" Data="@insuredList" Style="width: 100%;" TextProperty="FullName" ValueProperty="InsuredId" Name="InsuredId"></RadzenDropDown>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="1" SizeMD="1">
+                                                <RadzenLabel Text="Company" Component="CompanyId" Style="width: 100%; text-align: right;" />
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="2" SizeMD="2">
+                                                <RadzenDropDown @bind-Value="lifeCase.CompanyId" AllowClear="true" Placeholder="Select company" Data="@companyList" Style="width: 100%;" TextProperty="Name" ValueProperty="CompanyId" Name="CompanyId"></RadzenDropDown>
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="1" SizeMD="1">
+                                                <RadzenLabel Text="Policy #" Component="PolicyNumber" Style="width: 100%; text-align: right;" />
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="1" SizeMD="1">
+                                                <RadzenTextBox Style="width: 100%;" Name="PolicyNumber" @bind-Value=@lifeCase.PolicyNumber />
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="1" SizeMD="1">
+                                                <RadzenLabel Text="Policy Issued" Component="PolicyIssued" Style="width: 100%; text-align: right;" />
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="1" SizeMD="1">
+                                                <RadzenDatePicker Style="width: 100%;" Name="PolicyIssued" @bind-Value="lifeCase.PolicyIssued" />
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="1" SizeMD="1">
+                                                <RadzenLabel Text="Status" Component="PolicyStatus" Style="width: 100%; text-align: right;" />
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="2" SizeMD="2">
+                                                <RadzenDropDown @bind-Value="lifeCase.Status" AllowClear="true" Placeholder="Select status" Data="@lifeCaseStatusList" Style="width: 100%;" Name="PolicyStatus"></RadzenDropDown>
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                    </RadzenFieldset>
+                                </RadzenStack>
+                            </RadzenColumn>
+                        </RadzenRow>
+                        <RadzenRow>
+
+                        </RadzenRow>
+                        <RadzenRow>
+                            <RadzenColumn Size="3" SizeMD="3">
+                                <RadzenRow>
+                                    <RadzenColumn Size="12" SizeMD="12">
+                                        <RadzenStack>
+                                            <RadzenFieldset Text="Active Before" Style="background-color: lightgray">
+                                                <RadzenStack Gap="1rem">
+                                                    <RadzenRow AlignItems="AlignItems.Center">
+                                                        <RadzenColumn Size="12" SizeMD="12">
+                                                            <RadzenDropDown @bind-Value="lifeCase.OfferABCompanyId" AllowClear="true" Placeholder="Select company" Data="@companyList" Style="width: 100%;" TextProperty="Name" ValueProperty="CompanyId" Name="CompanyId"></RadzenDropDown>
+                                                            <RadzenRow AlignItems="AlignItems.Center">
+                                                                <RadzenColumn Size="6" SizeMD="6">
+                                                                    <RadzenTextBox Style="width: 100%;" Name="PolicyNumber" @bind-Value=@lifeCase.OfferABPolicyNumber />
+                                                                </RadzenColumn>
+                                                                <RadzenColumn Size="6" SizeMD="6">
+                                                                    <RadzenDatePicker Style="width: 100%;" Name="PolicyIssued" @bind-Value="lifeCase.OfferABPolicyExpiry" />
+                                                                </RadzenColumn>
+                                                            </RadzenRow>
+                                                        </RadzenColumn>
+                                                    </RadzenRow>
+                                                    <RadzenRow AlignItems="AlignItems.Center">
+                                                        <RadzenColumn Size="12" SizeMD="12">
+                                                            <RadzenLabel Text="FA" Component="OfferABFaceAmount" Style="width: 100%; text-align: center;" />
+                                                            <RadzenNumeric Style="width: 100%;" Name="OfferABFaceAmount" @bind-Value=@lifeCase.OfferABFaceAmount Step="0.01" Min="0" Format="C2" ShowUpDown="false" />
+                                                        </RadzenColumn>
+                                                    </RadzenRow>
+                                                    <RadzenRow AlignItems="AlignItems.Center">
+                                                        <RadzenColumn Size="12" SizeMD="12">
+                                                            <RadzenLabel Text="YEARS" Component="OfferABYears" Style="width: 100%; text-align: center;" />
+                                                            <RadzenNumeric Style="width: 100%;" Name="OfferABYears" Min="0" @bind-Value=@lifeCase.OfferABYears />
+                                                        </RadzenColumn>
+                                                    </RadzenRow>
+                                                    <RadzenRow AlignItems="AlignItems.Center">
+                                                        <RadzenColumn Size="12" SizeMD="12">
+                                                            <RadzenLabel Text="CLASS" Component="OfferABClass" Style="width: 100%; text-align: center;" />
+                                                            <RadzenTextBox Style="width: 100%;" Name="OfferABClass" @bind-Value=@lifeCase.OfferABClass />
+                                                        </RadzenColumn>
+                                                    </RadzenRow>
+                                                    <RadzenRow AlignItems="AlignItems.Center">
+                                                        <RadzenColumn Size="12" SizeMD="12">
+                                                            <RadzenLabel Text="RIDERS" Component="OfferABRiders" Style="width: 100%; text-align: center;" />
+                                                            <RadzenTextBox Style="width: 100%;" Name="OfferABRiders" @bind-Value=@lifeCase.OfferABRiders />
+                                                        </RadzenColumn>
+                                                    </RadzenRow>
+                                                    <RadzenRow AlignItems="AlignItems.Center">
+                                                        <RadzenColumn Size="12" SizeMD="12">
+                                                            <RadzenLabel Text="PREMIUM" Component="OfferABPremium" Style="width: 100%; text-align: center;" />
+                                                            <RadzenNumeric Style="width: 100%;" Name="OfferABPremium" @bind-Value=@lifeCase.OfferABPremium Step="0.01" Min="0" Format="C2" ShowUpDown="false" />
+                                                        </RadzenColumn>
+                                                    </RadzenRow>
+                                                    <RadzenRow AlignItems="AlignItems.Center">
+                                                        <RadzenColumn Size="12" SizeMD="12">
+                                                            <RadzenLabel Text="PAYMENT MODE" Component="OfferABPaymentMode" Style="width: 100%; text-align: center;" />
+                                                            <RadzenTextBox Style="width: 100%;" Name="OfferABPaymentMode" @bind-Value=@lifeCase.OfferABPaymentMode />
+                                                        </RadzenColumn>
+                                                    </RadzenRow>
+                                                </RadzenStack>
+                                            </RadzenFieldset>
+                                        </RadzenStack>
+                                    </RadzenColumn>
+                                </RadzenRow>
+                            </RadzenColumn>
+                            <RadzenColumn Size="9" SizeMD="9">
+                                <RadzenRow AlignItems="AlignItems.Center">
+                                    <RadzenColumn Size="12" SizeMD="12">
+                                        <RadzenRow AlignItems="AlignItems.Center">
+                                            <RadzenLabel Text="Name of the Plan" Style="width: 100%;" />
+                                        </RadzenRow>
+                                        <RadzenRow AlignItems="AlignItems.Center">
+                                            <RadzenTextBox Style="width: 100%;" Name="PolicyNumber" @bind-Value=@lifeCase.OfferABPolicyNumber />
+                                        </RadzenRow>
+                                    </RadzenColumn>
+                                </RadzenRow>
+                                <RadzenRow>
+                                    <RadzenColumn Size="3" SizeMD="3">
+                                        <RadzenStack>
+                                            <RadzenFieldset Text="Applying For">
+                                                <RadzenStack Gap="1rem">
+                                                    <RadzenRow AlignItems="AlignItems.Center">
+                                                        <RadzenColumn Size="12" SizeMD="12">
+                                                            <RadzenLabel Text="FA" Component="OfferAFFaceAmount" Style="width: 100%; text-align: center;" />
+                                                            <RadzenNumeric Style="width: 100%;" Name="OfferAFFaceAmount" @bind-Value=@lifeCase.OfferAFFaceAmount Step="0.01" Min="0" Format="C2" ShowUpDown="false" />
+                                                        </RadzenColumn>
+                                                    </RadzenRow>
+                                                    <RadzenRow AlignItems="AlignItems.Center">
+                                                        <RadzenColumn Size="12" SizeMD="12">
+                                                            <RadzenLabel Text="YEARS" Component="OfferAFYears" Style="width: 100%; text-align: center;" />
+                                                            <RadzenNumeric Style="width: 100%;" Name="OfferAFYears" Min="0" @bind-Value=@lifeCase.OfferAFYears />
+                                                        </RadzenColumn>
+                                                    </RadzenRow>
+                                                    <RadzenRow AlignItems="AlignItems.Center">
+                                                        <RadzenColumn Size="12" SizeMD="12">
+                                                            <RadzenLabel Text="CLASS" Component="OfferAFClass" Style="width: 100%; text-align: center;" />
+                                                            <RadzenTextBox Style="width: 100%;" Name="OfferAFClass" @bind-Value=@lifeCase.OfferAFClass />
+                                                        </RadzenColumn>
+                                                    </RadzenRow>
+                                                    <RadzenRow AlignItems="AlignItems.Center">
+                                                        <RadzenColumn Size="12" SizeMD="12">
+                                                            <RadzenLabel Text="RIDERS" Component="OfferAFRiders" Style="width: 100%; text-align: center;" />
+                                                            <RadzenTextBox Style="width: 100%;" Name="OfferAFRiders" @bind-Value=@lifeCase.OfferAFRiders />
+                                                        </RadzenColumn>
+                                                    </RadzenRow>
+                                                    <RadzenRow AlignItems="AlignItems.Center">
+                                                        <RadzenColumn Size="12" SizeMD="12">
+                                                            <RadzenLabel Text="PREMIUM" Component="OfferAFPremium" Style="width: 100%; text-align: center;" />
+                                                            <RadzenNumeric Style="width: 100%;" Name="OfferAFPremium" @bind-Value=@lifeCase.OfferAFPremium Step="0.01" Min="0" Format="C2" ShowUpDown="false" />
+                                                        </RadzenColumn>
+                                                    </RadzenRow>
+                                                    <RadzenRow AlignItems="AlignItems.Center">
+                                                        <RadzenColumn Size="12" SizeMD="12">
+                                                            <RadzenLabel Text="PAYMENT MODE" Component="OfferAFPaymentMode" Style="width: 100%; text-align: center;" />
+                                                            <RadzenTextBox Style="width: 100%;" Name="OfferAFPaymentMode" @bind-Value=@lifeCase.OfferAFPaymentMode />
+                                                        </RadzenColumn>
+                                                    </RadzenRow>
+                                                </RadzenStack>
+                                            </RadzenFieldset>
+                                        </RadzenStack>
+                                    </RadzenColumn>
+                                    <RadzenColumn Size="3" SizeMD="3">
+                                        <RadzenStack>
+                                            <RadzenFieldset Text="Company Offer">
+                                                <RadzenStack Gap="1rem">
+                                                    <RadzenRow AlignItems="AlignItems.Center">
+                                                        <RadzenColumn Size="12" SizeMD="12">
+                                                            <RadzenLabel Text="FA" Component="OfferCOFaceAmount" Style="width: 100%; text-align: center;" />
+                                                            <RadzenNumeric Style="width: 100%;" Name="OfferCOFaceAmount" @bind-Value=@lifeCase.OfferCOFaceAmount Step="0.01" Min="0" Format="C2" ShowUpDown="false" />
+                                                        </RadzenColumn>
+                                                    </RadzenRow>
+                                                    <RadzenRow AlignItems="AlignItems.Center">
+                                                        <RadzenColumn Size="12" SizeMD="12">
+                                                            <RadzenLabel Text="YEARS" Component="OfferCOYears" Style="width: 100%; text-align: center;" />
+                                                            <RadzenNumeric Style="width: 100%;" Name="OfferCOYears" Min="0" @bind-Value=@lifeCase.OfferCOYears />
+                                                        </RadzenColumn>
+                                                    </RadzenRow>
+                                                    <RadzenRow AlignItems="AlignItems.Center">
+                                                        <RadzenColumn Size="12" SizeMD="12">
+                                                            <RadzenLabel Text="CLASS" Component="OfferCOClass" Style="width: 100%; text-align: center;" />
+                                                            <RadzenTextBox Style="width: 100%;" Name="OfferCOClass" @bind-Value=@lifeCase.OfferCOClass />
+                                                        </RadzenColumn>
+                                                    </RadzenRow>
+                                                    <RadzenRow AlignItems="AlignItems.Center">
+                                                        <RadzenColumn Size="12" SizeMD="12">
+                                                            <RadzenLabel Text="RIDERS" Component="OfferCORiders" Style="width: 100%; text-align: center;" />
+                                                            <RadzenTextBox Style="width: 100%;" Name="OfferCORiders" @bind-Value=@lifeCase.OfferCORiders />
+                                                        </RadzenColumn>
+                                                    </RadzenRow>
+                                                    <RadzenRow AlignItems="AlignItems.Center">
+                                                        <RadzenColumn Size="12" SizeMD="12">
+                                                            <RadzenLabel Text="PREMIUM" Component="OfferCOPremium" Style="width: 100%; text-align: center;" />
+                                                            <RadzenNumeric Style="width: 100%;" Name="OfferCOPremium" @bind-Value=@lifeCase.OfferCOPremium Step="0.01" Min="0" Format="C2" ShowUpDown="false" />
+                                                        </RadzenColumn>
+                                                    </RadzenRow>
+                                                    <RadzenRow AlignItems="AlignItems.Center">
+                                                        <RadzenColumn Size="12" SizeMD="12">
+                                                            <RadzenLabel Text="PAYMENT MODE" Component="OfferCOPaymentMode" Style="width: 100%; text-align: center;" />
+                                                            <RadzenTextBox Style="width: 100%;" Name="OfferCOPaymentMode" @bind-Value=@lifeCase.OfferCOPaymentMode />
+                                                        </RadzenColumn>
+                                                    </RadzenRow>
+                                                </RadzenStack>
+                                            </RadzenFieldset>
+                                        </RadzenStack>
+                                    </RadzenColumn>
+                                    <RadzenColumn Size="3" SizeMD="3">
+                                        <RadzenStack>
+                                            <RadzenFieldset Text="Counter Offer">
+                                                <RadzenStack Gap="1rem">
+                                                    <RadzenRow AlignItems="AlignItems.Center">
+                                                        <RadzenColumn Size="12" SizeMD="12">
+                                                            <RadzenLabel Text="FA" Component="OfferROFaceAmount" Style="width: 100%; text-align: center;" />
+                                                            <RadzenNumeric Style="width: 100%;" Name="OfferROFaceAmount" @bind-Value=@lifeCase.OfferROFaceAmount Step="0.01" Min="0" Format="C2" ShowUpDown="false" />
+                                                        </RadzenColumn>
+                                                    </RadzenRow>
+                                                    <RadzenRow AlignItems="AlignItems.Center">
+                                                        <RadzenColumn Size="12" SizeMD="12">
+                                                            <RadzenLabel Text="YEARS" Component="OfferROYears" Style="width: 100%; text-align: center;" />
+                                                            <RadzenNumeric Style="width: 100%;" Name="OfferROYears" Min="0" @bind-Value=@lifeCase.OfferROYears />
+                                                        </RadzenColumn>
+                                                    </RadzenRow>
+                                                    <RadzenRow AlignItems="AlignItems.Center">
+                                                        <RadzenColumn Size="12" SizeMD="12">
+                                                            <RadzenLabel Text="CLASS" Component="OfferROClass" Style="width: 100%; text-align: center;" />
+                                                            <RadzenTextBox Style="width: 100%;" Name="OfferROClass" @bind-Value=@lifeCase.OfferROClass />
+                                                        </RadzenColumn>
+                                                    </RadzenRow>
+                                                    <RadzenRow AlignItems="AlignItems.Center">
+                                                        <RadzenColumn Size="12" SizeMD="12">
+                                                            <RadzenLabel Text="RIDERS" Component="OfferRORiders" Style="width: 100%; text-align: center;" />
+                                                            <RadzenTextBox Style="width: 100%;" Name="OfferRORiders" @bind-Value=@lifeCase.OfferRORiders />
+                                                        </RadzenColumn>
+                                                    </RadzenRow>
+                                                    <RadzenRow AlignItems="AlignItems.Center">
+                                                        <RadzenColumn Size="12" SizeMD="12">
+                                                            <RadzenLabel Text="PREMIUM" Component="OfferROPremium" Style="width: 100%; text-align: center;" />
+                                                            <RadzenNumeric Style="width: 100%;" Name="OfferROPremium" @bind-Value=@lifeCase.OfferROPremium Step="0.01" Min="0" Format="C2" ShowUpDown="false" />
+                                                        </RadzenColumn>
+                                                    </RadzenRow>
+                                                    <RadzenRow AlignItems="AlignItems.Center">
+                                                        <RadzenColumn Size="12" SizeMD="12">
+                                                            <RadzenLabel Text="PAYMENT MODE" Component="OfferROPaymentMode" Style="width: 100%; text-align: center;" />
+                                                            <RadzenTextBox Style="width: 100%;" Name="OfferROPaymentMode" @bind-Value=@lifeCase.OfferROPaymentMode />
+                                                        </RadzenColumn>
+                                                    </RadzenRow>
+                                                </RadzenStack>
+                                            </RadzenFieldset>
+                                        </RadzenStack>
+                                    </RadzenColumn>
+                                    <RadzenColumn Size="3" SizeMD="3">
+                                        <RadzenStack>
+                                            <RadzenFieldset Text="Acceptance">
+                                                <RadzenStack Gap="1rem">
+                                                    <RadzenRow AlignItems="AlignItems.Center">
+                                                        <RadzenColumn Size="12" SizeMD="12">
+                                                            <RadzenLabel Text="FA" Component="OfferACFaceAmount" Style="width: 100%; text-align: center;" />
+                                                            <RadzenNumeric Style="width: 100%;" Name="OfferACFaceAmount" @bind-Value=@lifeCase.OfferACFaceAmount Step="0.01" Min="0" Format="C2" ShowUpDown="false" />
+                                                        </RadzenColumn>
+                                                    </RadzenRow>
+                                                    <RadzenRow AlignItems="AlignItems.Center">
+                                                        <RadzenColumn Size="12" SizeMD="12">
+                                                            <RadzenLabel Text="YEARS" Component="OfferACYears" Style="width: 100%; text-align: center;" />
+                                                            <RadzenNumeric Style="width: 100%;" Name="OfferACYears" Min="0" @bind-Value=@lifeCase.OfferACYears />
+                                                        </RadzenColumn>
+                                                    </RadzenRow>
+                                                    <RadzenRow AlignItems="AlignItems.Center">
+                                                        <RadzenColumn Size="12" SizeMD="12">
+                                                            <RadzenLabel Text="CLASS" Component="OfferACClass" Style="width: 100%; text-align: center;" />
+                                                            <RadzenTextBox Style="width: 100%;" Name="OfferACClass" @bind-Value=@lifeCase.OfferACClass />
+                                                        </RadzenColumn>
+                                                    </RadzenRow>
+                                                    <RadzenRow AlignItems="AlignItems.Center">
+                                                        <RadzenColumn Size="12" SizeMD="12">
+                                                            <RadzenLabel Text="RIDERS" Component="OfferACRiders" Style="width: 100%; text-align: center;" />
+                                                            <RadzenTextBox Style="width: 100%;" Name="OfferACRiders" @bind-Value=@lifeCase.OfferACRiders />
+                                                        </RadzenColumn>
+                                                    </RadzenRow>
+                                                    <RadzenRow AlignItems="AlignItems.Center">
+                                                        <RadzenColumn Size="12" SizeMD="12">
+                                                            <RadzenLabel Text="PREMIUM" Component="OfferACPremium" Style="width: 100%; text-align: center;" />
+                                                            <RadzenNumeric Style="width: 100%;" Name="OfferACPremium" @bind-Value=@lifeCase.OfferACPremium Step="0.01" Min="0" Format="C2" ShowUpDown="false" />
+                                                        </RadzenColumn>
+                                                    </RadzenRow>
+                                                    <RadzenRow AlignItems="AlignItems.Center">
+                                                        <RadzenColumn Size="12" SizeMD="12">
+                                                            <RadzenLabel Text="PAYMENT MODE" Component="OfferACPaymentMode" Style="width: 100%; text-align: center;" />
+                                                            <RadzenTextBox Style="width: 100%;" Name="OfferACPaymentMode" @bind-Value=@lifeCase.OfferACPaymentMode />
+                                                        </RadzenColumn>
+                                                    </RadzenRow>
+                                                </RadzenStack>
+                                            </RadzenFieldset>
+                                        </RadzenStack>
+                                    </RadzenColumn>
+                                </RadzenRow>
+                            </RadzenColumn>
+                        </RadzenRow>
+                        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Gap="1rem" class="rz-mt-8 rz-mb-4">
+                            <RadzenButton ButtonType="ButtonType.Submit" Size="ButtonSize.Large" Icon="save" Text="Save" />
+                            <RadzenButton ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Large" Icon="cancel" Text="Cancel" Click="@Cancel" />
+                        </RadzenStack>
+                    </RadzenTabsItem>
+                    <RadzenTabsItem Text="INSURED">
+                        <RadzenRow Gap="1rem" class="rz-p-0 rz-p-lg-4">
+                            <RadzenColumn Size="4" SizeMD="4">
+                                <RadzenStack>
+                                    <RadzenFieldset Text="Insured Info">
+                                        <RadzenStack Gap="1rem">
+                                            <RadzenRow AlignItems="AlignItems.Center">
+                                                <RadzenColumn Size="4" SizeMD="4">
+                                                    <RadzenLabel Text="First Name" Component="FirstName" />
+                                                </RadzenColumn>
+                                                <RadzenColumn Size="8" SizeMD="8">
+                                                    <RadzenTextBox @bind-Value=@lifeCase.FirstName Style="width: 100%;" Name="FirstName" />
+                                                </RadzenColumn>
+                                            </RadzenRow>
+                                            <RadzenRow AlignItems="AlignItems.Center">
+                                                <RadzenColumn Size="4" SizeMD="4">
+                                                    <RadzenLabel Text="Last Name" Component="LastName" />
+                                                </RadzenColumn>
+                                                <RadzenColumn Size="8" SizeMD="8">
+                                                    <RadzenTextBox @bind-Value=@lifeCase.LastName Style="width: 100%;" Name="LastName" />
+                                                </RadzenColumn>
+                                            </RadzenRow>
+                                            <RadzenRow AlignItems="AlignItems.Center">
+                                                <RadzenColumn Size="4" SizeMD="4">
+                                                    <RadzenLabel Text="Address" Component="ResidenceAddress" />
+                                                </RadzenColumn>
+                                                <RadzenColumn Size="8" SizeMD="8">
+                                                    <RadzenTextBox @bind-Value=@lifeCase.ResidenceAddress Style="width: 100%;" Name="ResidenceAddress" />
+                                                </RadzenColumn>
+                                            </RadzenRow>
+                                            <RadzenRow AlignItems="AlignItems.Center">
+                                                <RadzenColumn Size="4" SizeMD="4">
+                                                    <RadzenLabel Text="City" Component="City" />
+                                                </RadzenColumn>
+                                                <RadzenColumn Size="8" SizeMD="8">
+                                                    <RadzenTextBox @bind-Value=@lifeCase.ResidenceCity Style="width: 100%;" Name="City" />
+                                                </RadzenColumn>
+                                            </RadzenRow>
+                                            <RadzenRow AlignItems="AlignItems.Center">
+                                                <RadzenColumn Size="4" SizeMD="4">
+                                                    <RadzenLabel Text="State" Component="State" />
+                                                </RadzenColumn>
+                                                <RadzenColumn Size="8" SizeMD="8">
+                                                    <RadzenTextBox @bind-Value=@lifeCase.ResidenceState Style="width: 100%;" Name="State" />
+                                                </RadzenColumn>
+                                            </RadzenRow>
+                                            <RadzenRow AlignItems="AlignItems.Center">
+                                                <RadzenColumn Size="4" SizeMD="4">
+                                                    <RadzenLabel Text="Zip / Postal Code" Component="Zip" />
+                                                </RadzenColumn>
+                                                <RadzenColumn Size="8" SizeMD="8">
+                                                    <RadzenTextBox @bind-Value=@lifeCase.ResidenceZip Style="width: 100%;" Name="Zip" />
+                                                </RadzenColumn>
+                                            </RadzenRow>
+                                            <RadzenRow AlignItems="AlignItems.Center">
+                                                <RadzenColumn Size="4" SizeMD="4">
+                                                    <RadzenLabel Text="Email" Component="Email" />
+                                                </RadzenColumn>
+                                                <RadzenColumn Size="8" SizeMD="8">
+                                                    <RadzenTextBox @bind-Value=@lifeCase.Email Style="width: 100%;" Name="Email" />
+                                                </RadzenColumn>
+                                            </RadzenRow>
+                                            <RadzenRow AlignItems="AlignItems.Center">
+                                                <RadzenColumn Size="4" SizeMD="4">
+                                                    <RadzenLabel Text="Contact" Component="Contact" />
+                                                </RadzenColumn>
+                                                <RadzenColumn Size="8" SizeMD="8">
+                                                    <RadzenTextBox @bind-Value=@lifeCase.Contact Style="width: 100%;" Name="Contact" />
+                                                </RadzenColumn>
+                                            </RadzenRow>
+                                            <RadzenRow AlignItems="AlignItems.Center">
+                                                <RadzenColumn Size="4" SizeMD="4">
+                                                    <RadzenLabel Text="D.O.B." Component="DateOfBirth" />
+                                                </RadzenColumn>
+                                                <RadzenColumn Size="8" SizeMD="8">
+                                                    <RadzenDatePicker @bind-Value="lifeCase.DateOfBirth" Style="width: 100%;" Name="DateOfBirth" />
+                                                </RadzenColumn>
+                                            </RadzenRow>
+                                        </RadzenStack>
+                                    </RadzenFieldset>
+                                </RadzenStack>
+                            </RadzenColumn>
+                            <RadzenColumn Size="4" SizeMD="4">
+                                <RadzenStack>
+                                    <RadzenFieldset Text="Other Info">
+                                        <RadzenStack Gap="1rem">
+                                            <RadzenRow AlignItems="AlignItems.Center">
+                                                <RadzenColumn Size="4" SizeMD="4">
+                                                    <RadzenLabel Text="DL#" Component="DriversLicense" />
+                                                </RadzenColumn>
+                                                <RadzenColumn Size="8" SizeMD="8">
+                                                    <RadzenTextBox @bind-Value=@lifeCase.DriversLicense Style="width: 100%;" Name="DriversLicense" />
+                                                </RadzenColumn>
+                                            </RadzenRow>
+                                            <RadzenRow AlignItems="AlignItems.Center">
+                                                <RadzenColumn Size="4" SizeMD="4">
+                                                    <RadzenLabel Text="DL's Name" Component="DriversLicenseName" />
+                                                </RadzenColumn>
+                                                <RadzenColumn Size="8" SizeMD="8">
+                                                    <RadzenTextBox @bind-Value=@lifeCase.DriversLicenseName Style="width: 100%;" Name="DriversLicenseName" />
+                                                </RadzenColumn>
+                                            </RadzenRow>
+                                            <RadzenRow AlignItems="AlignItems.Center">
+                                                <RadzenColumn Size="4" SizeMD="4">
+                                                    <RadzenLabel Text="SS#" Component="SocialSecurity" />
+                                                </RadzenColumn>
+                                                <RadzenColumn Size="8" SizeMD="8">
+                                                    <RadzenTextBox @bind-Value=@lifeCase.SocialSecurity Style="width: 100%;" Name="SocialSecurity" />
+                                                </RadzenColumn>
+                                            </RadzenRow>
+                                            <RadzenRow AlignItems="AlignItems.Center">
+                                                <RadzenColumn Size="4" SizeMD="4">
+                                                    <RadzenLabel Text="Tax#" Component="TaxIdNumber" />
+                                                </RadzenColumn>
+                                                <RadzenColumn Size="8" SizeMD="8">
+                                                    <RadzenTextBox @bind-Value=@lifeCase.TaxIdNumber Style="width: 100%;" Name="TaxIdNumber" />
+                                                </RadzenColumn>
+                                            </RadzenRow>
+                                            <RadzenRow AlignItems="AlignItems.Center">
+                                                <RadzenColumn Size="4" SizeMD="4">
+                                                    <RadzenLabel Text="Height" Component="Height" />
+                                                </RadzenColumn>
+                                                <RadzenColumn Size="8" SizeMD="8">
+                                                    <RadzenNumeric @bind-Value=@lifeCase.Height Placeholder="0.0" Step="0.5" Name="Height" />
+                                                </RadzenColumn>
+                                            </RadzenRow>
+                                            <RadzenRow AlignItems="AlignItems.Center">
+                                                <RadzenColumn Size="4" SizeMD="4">
+                                                    <RadzenLabel Text="Weight" Component="Weight" />
+                                                </RadzenColumn>
+                                                <RadzenColumn Size="8" SizeMD="8">
+                                                    <RadzenNumeric @bind-Value=@lifeCase.Weight Placeholder="0.0" Step="0.5" Name="Weight" />
+                                                </RadzenColumn>
+                                            </RadzenRow>
+                                        </RadzenStack>
+                                    </RadzenFieldset>
+                                </RadzenStack>
+                            </RadzenColumn>
+                            <RadzenColumn Size="4" SizeMD="4">
+                                <RadzenStack>
+                                    <RadzenFieldset Text="Relative Info">
+                                        <RadzenStack Gap="1rem">
+                                            <RadzenRow AlignItems="AlignItems.Center">
+                                                <RadzenColumn Size="4" SizeMD="4">
+                                                    <RadzenLabel Text="Relative" Component="RelativeId" />
+                                                </RadzenColumn>
+                                                <RadzenColumn Size="8" SizeMD="8">
+                                                    <RadzenDropDown @bind-Value="lifeCase.RelativeId" AllowClear="true" Placeholder="Select relative" Data="@insuredList" Style="width: 100%;" TextProperty="FullName" ValueProperty="InsuredId" Name="RelativeId"></RadzenDropDown>
+                                                </RadzenColumn>
+                                            </RadzenRow>
+                                            <RadzenRow AlignItems="AlignItems.Center">
+                                                <RadzenColumn Size="4" SizeMD="4">
+                                                    <RadzenLabel Text="Relative Name" Component="RelativeName" />
+                                                </RadzenColumn>
+                                                <RadzenColumn Size="8" SizeMD="8">
+                                                    <RadzenTextBox @bind-Value=@lifeCase.RelativeName Style="width: 100%;" Name="RelativeName" />
+                                                </RadzenColumn>
+                                            </RadzenRow>
+                                            <RadzenRow AlignItems="AlignItems.Center">
+                                                <RadzenColumn Size="4" SizeMD="4">
+                                                    <RadzenLabel Text="Relative D.O.B." Component="RelativeDateOfBirth" />
+                                                </RadzenColumn>
+                                                <RadzenColumn Size="8" SizeMD="8">
+                                                    <RadzenDatePicker @bind-Value="lifeCase.RelativeDateOfBirth" Style="width: 100%;" Name="RelativeDateOfBirth" />
+                                                </RadzenColumn>
+                                            </RadzenRow>
+                                            <RadzenRow AlignItems="AlignItems.Center">
+                                                <RadzenColumn Size="4" SizeMD="4">
+                                                    <RadzenLabel Text="Relative SS#" Component="RelativeSocialSecurity" />
+                                                </RadzenColumn>
+                                                <RadzenColumn Size="8" SizeMD="8">
+                                                    <RadzenTextBox @bind-Value=@lifeCase.RelativeSocialSecurity Style="width: 100%;" Name="RelativeSocialSecurity" />
+                                                </RadzenColumn>
+                                            </RadzenRow>
+                                        </RadzenStack>
+                                    </RadzenFieldset>
+                                </RadzenStack>
+                            </RadzenColumn>
+                        </RadzenRow>
                     </RadzenTabsItem>
                     <RadzenTabsItem Text="REMARKS">
                         <RadzenDataGrid @ref="lifeCaseRemarkGrid" Data="@lifeCaseRemarkList" TItem="LifeCaseRemark" AllowSorting="true" AllowColumnResize="true" EditMode=DataGridEditMode.Single>
@@ -106,7 +555,10 @@ else
 @code {
     RadzenDataGrid<LifeCaseRemark> lifeCaseRemarkGrid = new RadzenDataGrid<LifeCaseRemark>();
 
+    private List<string> lifeCaseStatusList = new List<string>();
     private List<Company> companyList = new List<Company>();
+    private List<Insured> insuredList = new List<Insured>();
+
     private List<LifeCase> lifeCaseList = new List<LifeCase>();
     private List<LifeCaseRemark> lifeCaseRemarkList = new List<LifeCaseRemark>();
     private LifeCase lifeCase = new LifeCase();
@@ -115,7 +567,9 @@ else
     {
         try
         {
+            lifeCaseStatusList = await ReferenceDataService.GetAllStatus();
             companyList = await ReferenceDataService.GetAllCompany();
+            insuredList = await InsuredService.GetAllInsured();
             lifeCaseList = await LifeCaseService.GetAllLifeCase();
         }
         catch (Exception ex)
@@ -124,17 +578,23 @@ else
         }
     }
 
-    public async Task Submit()
+    public async Task SaveLifeCase()
     {
         try
         {
             await LifeCaseService.SaveLifeCase(lifeCase);
+            lifeCaseList = await LifeCaseService.GetAllLifeCase();
             lifeCase = new LifeCase();
         }
         catch (Exception ex)
         {
             ErrorService.ReportError(ex);
         }
+    }
+
+    public async Task Cancel()
+    {
+        //
     }
 
     async Task SaveLifeCaseRemark(LifeCaseRemark item)

@@ -28,14 +28,10 @@
             ErrorMessage = msg;
             await InvokeAsync(StateHasChanged);
 
-            await Task.Delay(20000);
-            Dispose();
+            await Task.Delay(10000);
+            ErrorMessage = string.Empty;
             await InvokeAsync(StateHasChanged);
         };
     }
 
-    public void Dispose()
-    {
-        ErrorService.OnError -= (msg) => { };
-    }
 }

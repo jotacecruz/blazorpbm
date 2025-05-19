@@ -18,18 +18,6 @@ else
     <div style="display: flex;height: 45vh;flex-direction: column;overflow: auto;">
         <RadzenDataGrid Data="@insuredList" TItem="Insured" AllowSorting="true" AllowColumnResize="true" AllowFiltering="true" SelectionMode="DataGridSelectionMode.Single" FilterMode="FilterMode.Simple" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" RowSelect="@(async (item) => { insured = item; })">
             <Columns>
-                <RadzenDataGridColumn Property="Business" Title="Type" Width="5%">
-                    <Template>
-                        @if (context.Business == true)
-                        {
-                            <span>Business</span>
-                        }
-                        else
-                        {
-                            <span>Personal</span>
-                        }
-                    </Template>
-                </RadzenDataGridColumn>
                 <RadzenDataGridColumn Property="FullName" Title="Name" Width="auto" />
                 <RadzenDataGridColumn Property="Email" Title="Email" Width="auto" />
                 <RadzenDataGridColumn Property="Contact" Title="Contact" Width="auto" />

@@ -12,16 +12,16 @@
         //public string MailCity { get; set; }
         //public string MailState { get; set; }
         //public string MailZip { get; set; }
-        //public string ResidenceAddress { get; set; }
-        //public string ResidenceCity { get; set; }
-        //public string ResidenceState { get; set; }
-        //public string ResidenceZip { get; set; }
+        public string? ResidenceAddress { get; set; }
+        public string? ResidenceCity { get; set; }
+        public string? ResidenceState { get; set; }
+        public string? ResidenceZip { get; set; }
         //public string ResidencePhone { get; set; }
         public string? Email { get; set; }
         public string? Contact { get; set; }
         //public string AlternativeContact { get; set; }
         //public string HomeContact { get; set; }
-        //public DateOnly? DateOfBirth { get; set; }
+        public DateOnly? DateOfBirth { get; set; }
         //public string Nationality { get; set; }
         //public string USEntry { get; set; }
         //public string Passport { get; set; }
@@ -31,7 +31,7 @@
         public string? TaxIdNumber { get; set; }
         //public string CitizenVisa { get; set; }
         //public string CertificateOfFormation { get; set; }
-        public bool Business { get; set; }
+        //public bool Business { get; set; }
         //public string Occupation { get; set; }
         //public string Employer { get; set; }
         //public string EmployerAddress { get; set; }
@@ -46,6 +46,12 @@
         //public string Remarks { get; set; }
         //public bool Life { get; set; }
         //public bool PC { get; set; }
+        public decimal? Height { get; set; }
+        public decimal? Weight { get; set; }
+        public int? RelativeId { get; set; }
+        public string? RelativeName { get; set; }
+        public string? RelativeDateOfBirth { get; set; }
+        public string? RelativeSocialSecurity { get; set; }
 
         //public virtual ICollection<CustomerRemark> CustomerRemark { get; set; } = new List<CustomerRemark>();
 

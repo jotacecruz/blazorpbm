@@ -6,7 +6,7 @@ namespace BlazorPBM.Services
 {
     public class TokenService
     {
-        public AccessToken? AccessToken { get; private set; }
+        public AccessToken? AccessToken { get; set; }
         public GoogleUserInfo? UserInfo { get; set; }
 
         public void SetAccessToken(string token)

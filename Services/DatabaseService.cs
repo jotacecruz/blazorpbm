@@ -14,6 +14,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 using Newtonsoft.Json.Linq;
 using System.Xml.Linq;
 using Google.Apis.Json;
+using System.ComponentModel;
 
 namespace BlazorPBM.Services
 {
@@ -138,7 +139,10 @@ namespace BlazorPBM.Services
 
         public static GoogleSheetRow ToValueRange<U>(U obj)
         {
-            List<object> row = typeof(U).GetProperties().Select(p => (object?)p.GetValue(obj) ?? string.Empty).ToList();
+            List<object> row = typeof(U).GetProperties()
+                .Where(p => p.PropertyType.IsValueType || p.PropertyType == typeof(string))//include only value types and strings
+                .Where(p => p.GetGetMethod()?.IsVirtual == false || p.GetGetMethod()?.IsFinal == true)//exclude virtual properties
+                .Select(p => (object?)p.GetValue(obj) ?? string.Empty).ToList();
             return new GoogleSheetRow
             {
                 majorDimension = "ROWS",
