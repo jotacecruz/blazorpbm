@@ -1,0 +1,53 @@
+﻿@page "/propertycasualty"
+@using BlazorPBM.Models
+@using BlazorPBM.Services
+@using Radzen
+@using Radzen.Blazor
+@inject PropertyCasualtyService PropertyCasualtyService
+
+<PageTitle>Insured</PageTitle>
+
+<h1>Insured</h1>
+
+@if (propertyCasualtyList == null)
+{
+    <p><em><i>loading...</i></em></p>
+}
+else
+{
+    <div style="display: flex;height: 45vh;flex-direction: column;overflow: auto;">
+        <RadzenDataGrid Data="@propertyCasualtyList" TItem="PropertyCasualty" AllowSorting="true" AllowColumnResize="true" AllowFiltering="true" SelectionMode="DataGridSelectionMode.Single" FilterMode="FilterMode.Simple" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" RowSelect="@(async (item) => { propertyCasualty = item; })">
+            <Columns>
+                <RadzenDataGridColumn Property="FullName" Title="Name" Width="auto" />
+                <RadzenDataGridColumn Property="Email" Title="Email" Width="auto" />
+                <RadzenDataGridColumn Property="Contact" Title="Contact" Width="auto" />
+                <RadzenDataGridColumn Property="AlternativeContact" Title="Alternative" Width="auto" />
+            </Columns>
+        </RadzenDataGrid>
+    </div>
+    <center style="background-color:black;padding:2px;margin:8px 0px 8px 0px;"><span><b style="color: white">@(propertyCasualty.InsuredId <= 0 ? "new record" : $"{propertyCasualty.Insured.FullName?.ToUpper()} (ID: {propertyCasualty.InsuredId})")</b></span></center>
+    <div style="display: flex;height: 45vh;flex-direction: column;overflow: auto;">
+        <RadzenTabs RenderMode="TabRenderMode.Server">
+            <Tabs>
+                <RadzenTabsItem Text="Info">
+                    @* <CustomerInfo Customer="@customer" OnSave="@(async () => { customers = await BusinessService.GetCustomers(); })" OnCancel="@(() => { customer =  new Customer();})"></CustomerInfo> *@
+                </RadzenTabsItem>
+                <RadzenTabsItem Text="Remarks">
+                    @* <CustomerRemarks Customer="@customer" OnSave="@(async () => { customers = await BusinessService.GetCustomers(); })" OnCancel="@(() => { customer =  new Customer();})"></CustomerRemarks> *@
+                </RadzenTabsItem>
+            </Tabs>
+        </RadzenTabs>
+    </div>
+}
+
+
+@code {
+
+    private List<PropertyCasualty>? propertyCasualtyList;
+    private PropertyCasualty propertyCasualty = new PropertyCasualty();
+
+    protected override async Task OnInitializedAsync()
+    {
+        propertyCasualtyList = await PropertyCasualtyService.GetAllPropertyCasualty();
+    }
+}

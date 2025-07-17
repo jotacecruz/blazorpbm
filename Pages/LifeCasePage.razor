@@ -18,7 +18,7 @@
 }
 else
 {
-    <div style="display: flex;height: 150vh;flex-direction: column;">
+    <div style="display: flex;height: 130vh;flex-direction: column;">
         <div style="height:20vh; overflow: auto;">
             <RadzenDataGrid Data="@lifeCaseList" TItem="LifeCase" AllowSorting="true" AllowColumnResize="true" SelectionMode="DataGridSelectionMode.Single" RowSelect="@(async (item) => { lifeCase = item; lifeCaseRemarkList = await LifeCaseRemarkService.GetAllLifeCaseRemark(item.LifeCaseId);})">
                 <HeaderTemplate>
@@ -34,7 +34,7 @@ else
                 </Columns>
             </RadzenDataGrid>
         </div>
-        <div style="height:80vh; overflow: auto;margin-top:1%;">
+        <div style="height:110vh; overflow: auto;margin-top:1%;">
             <RadzenTabs RenderMode="TabRenderMode.Server">
                 <Tabs>
                     <RadzenTabsItem Text="CASE">
@@ -79,28 +79,31 @@ else
                             </RadzenColumn>
                         </RadzenRow>
                         <RadzenRow>
-
+                            <hr />
                         </RadzenRow>
-                        <RadzenRow>
+                        <RadzenRow >
                             <RadzenColumn Size="3" SizeMD="3">
+                                <RadzenRow AlignItems="AlignItems.Center">
+                                    <RadzenColumn Size="12" SizeMD="12">
+                                        <RadzenRow AlignItems="AlignItems.Center">
+                                            <RadzenDropDown @bind-Value="lifeCase.OfferABCompanyId" AllowClear="true" Placeholder="Select company" Data="@companyList" Style="width: 100%;" TextProperty="Name" ValueProperty="CompanyId" Name="CompanyId"></RadzenDropDown>
+                                        </RadzenRow>
+                                        <RadzenRow AlignItems="AlignItems.Center">
+                                            <RadzenColumn Size="6" SizeMD="6">
+                                                <RadzenTextBox Style="width: 100%;" Name="PolicyNumber" @bind-Value=@lifeCase.OfferABPolicyNumber />
+                                            </RadzenColumn>
+                                            <RadzenColumn Size="6" SizeMD="6">
+                                                <RadzenDatePicker Style="width: 100%;" Name="PolicyIssued" @bind-Value="lifeCase.OfferABPolicyExpiry" />
+                                            </RadzenColumn>
+                                        </RadzenRow>
+                                    </RadzenColumn>
+                                </RadzenRow>
+                                <br />
                                 <RadzenRow>
                                     <RadzenColumn Size="12" SizeMD="12">
                                         <RadzenStack>
-                                            <RadzenFieldset Text="Active Before" Style="background-color: lightgray">
+                                            <RadzenFieldset Text="Active Before" Style="border: solid 1px black">
                                                 <RadzenStack Gap="1rem">
-                                                    <RadzenRow AlignItems="AlignItems.Center">
-                                                        <RadzenColumn Size="12" SizeMD="12">
-                                                            <RadzenDropDown @bind-Value="lifeCase.OfferABCompanyId" AllowClear="true" Placeholder="Select company" Data="@companyList" Style="width: 100%;" TextProperty="Name" ValueProperty="CompanyId" Name="CompanyId"></RadzenDropDown>
-                                                            <RadzenRow AlignItems="AlignItems.Center">
-                                                                <RadzenColumn Size="6" SizeMD="6">
-                                                                    <RadzenTextBox Style="width: 100%;" Name="PolicyNumber" @bind-Value=@lifeCase.OfferABPolicyNumber />
-                                                                </RadzenColumn>
-                                                                <RadzenColumn Size="6" SizeMD="6">
-                                                                    <RadzenDatePicker Style="width: 100%;" Name="PolicyIssued" @bind-Value="lifeCase.OfferABPolicyExpiry" />
-                                                                </RadzenColumn>
-                                                            </RadzenRow>
-                                                        </RadzenColumn>
-                                                    </RadzenRow>
                                                     <RadzenRow AlignItems="AlignItems.Center">
                                                         <RadzenColumn Size="12" SizeMD="12">
                                                             <RadzenLabel Text="FA" Component="OfferABFaceAmount" Style="width: 100%; text-align: center;" />
@@ -147,13 +150,15 @@ else
                                 <RadzenRow AlignItems="AlignItems.Center">
                                     <RadzenColumn Size="12" SizeMD="12">
                                         <RadzenRow AlignItems="AlignItems.Center">
-                                            <RadzenLabel Text="Name of the Plan" Style="width: 100%;" />
+                                            @* <RadzenLabel Text="NAME OF THE PLAN" /><RadzenTextBox Visible=false></RadzenTextBox> *@
+                                            <span class="rz-textbox rz-state-empty" style="width:100%; text-align:center;font-weight:bold;">NAME OF THE PLAN</span>
                                         </RadzenRow>
                                         <RadzenRow AlignItems="AlignItems.Center">
                                             <RadzenTextBox Style="width: 100%;" Name="PolicyNumber" @bind-Value=@lifeCase.OfferABPolicyNumber />
                                         </RadzenRow>
                                     </RadzenColumn>
                                 </RadzenRow>
+                                <br />
                                 <RadzenRow>
                                     <RadzenColumn Size="3" SizeMD="3">
                                         <RadzenStack>
@@ -567,8 +572,8 @@ else
     {
         try
         {
-            lifeCaseStatusList = await ReferenceDataService.GetAllStatus();
-            companyList = await ReferenceDataService.GetAllCompany();
+            lifeCaseStatusList = await ReferenceDataService.GetStatus();
+            companyList = await ReferenceDataService.GetLifeCompany();
             insuredList = await InsuredService.GetAllInsured();
             lifeCaseList = await LifeCaseService.GetAllLifeCase();
         }
